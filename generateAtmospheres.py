@@ -130,7 +130,7 @@ def write_array(array, fileName, removeHeader = 0, resetTo = 0):
 def deltaLambda(currentFile):
     """Calculates the deltaLambda for the given lopa file.
 
-    Calculates the difference in wawelength in two adjancent data points in the given lopa file.
+    Calculates the difference in wawelength of two adjancent data points in the given lopa file.
 
     Parameters
     ----------
@@ -153,7 +153,8 @@ def deltaLambda(currentFile):
             bufferPosition = bufferPosition + 1
     deltaLambdaList = np.append(deltaLambdaList, 0)
     sortedWorkBuffer = np.c_[sortedWorkBuffer, deltaLambdaList] #append the column with delta lambda values
-    np.savetxt('T' + temperatures[int(currentFile.split('.')[0]) / len(Nh)] + 'Nh' + Nh[int(currentFile.split('.')[0]) % len(Nh)] + '.opa', sortedWorkBuffer, fmt = floatFormat) #this is the last write to the disk we make
+#    np.savetxt('T' + temperatures[int(currentFile.split('.')[0]) / len(Nh)] + 'Nh' + Nh[int(currentFile.split('.')[0]) % len(Nh)] + '.opa', sortedWorkBuffer, fmt = floatFormat) #this is the last write to the disk we make
+    np.savetxt(currentFile,sortedWorkBuffer, fmt = floatFormat)
     pass
 
 def deleteOverlapping(tempList, fileName):
@@ -228,7 +229,7 @@ def bining(depthList):
   
 def reducing(currentFile):
     counter = currentFile
-#    currentFile = str(currentFile).zfill(depthLength) + '.segment'
+    currentFile = str(currentFile).zfill(depthLength) + '.segment'
     print('Reducing: ' + str(currentFile))
     data = np.loadtxt(currentFile) #load the current file to memory
     binData = np.loadtxt(args.bins)
@@ -284,7 +285,7 @@ def sub_bins(subBinFile, singleBin, tempList, counter):
             if (np.array_equal(line,tempList[-1])):
                 end = singleBin[1]
                 subbinArray = np.delete(subbinArray, (0), axis=0)
-                f = open(str(counter) + '.r' + args.subBins.split('s')[-1], "a")
+                f = open(str(counter) + '.r' + args.subBins.split('s')[-1] + 'Nh' + args.Nh[counter%len(args.Nh)], "a")
                 np.savetxt(f, subbinArray, fmt = floatFormat)
                 f.close()
         elif (np.array_equal(line,tempList[-1])):
@@ -293,9 +294,10 @@ def sub_bins(subBinFile, singleBin, tempList, counter):
             deltaLambda = 0
             subbinArray = np.vstack([subbinArray,[beginning, end, temp]])
             subbinArray = np.delete(subbinArray, (0), axis=0)
-            f = open(str(counter) + '.r' + args.subBins.split('s')[-1], "a")
+            f = open(str(counter) + '.r' + args.subBins.split('s')[-1] + 'Nh' + args.Nh[counter%len(args.Nh)], "a")
             np.savetxt(f, subbinArray, fmt = floatFormat)
             f.close()
 
-opaList = sorted(glob.glob('*.opa'), reverse=False)
-bining(opaList)
+#opaList = sorted(glob.glob('*.opa'), reverse=False)
+#bining(opaList)
+bining(depthList)
