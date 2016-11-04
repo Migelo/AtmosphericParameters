@@ -1,0 +1,105 @@
+#!/bin/bash
+(
+sleep 600	#this is the worst part of the script, this is suitable for funning the hminus on atlas2 node, 1 core
+				#optimal solution would run this part of the script at the end of the first successfull completion of the 2nd part of the script	
+number_of_processes=$(ps aux | pgrep hminus.exe | wc -l)
+if [ $number_of_processes -gt 0 ]; then
+	time_elapsed=$(ps aux | grep hminus.exe | awk '{print $10}'| awk -F':' '{print $1}') #get the process run time
+	time_elapsed=( $time_elapsed ) #transform string into an array
+	unset time_elapsed[${#time_elapsed[@]}-1] #delete the last element of the array
+	pid=$(ps aux | grep hminus.exe | awk '{print $2}') #repeat the same with process ID (PID)
+	pid=( $pid )
+	unset pid[${#pid[@]}-1]
+	counter=0
+#	echo 'time: '"${time_elapsed[*]}"
+#	echo 'pid: '"${pid[*]}"
+	for time in ${time_elapsed[*]};
+	do
+		#echo "${time}"
+		if [ $((time)) -gt 2 ]; then
+			echo 'Killing process with time: '"${time}"' minutes, pid: '"${pid[$counter]}"'.'
+			kill -9 "${pid[$counter]}"
+		fi
+		counter=$counter+1
+	done
+fi
+) &
+for file in atmospheres/*.atm;
+do(
+  folder_name=$(echo "$file" |awk -F'.' '{print $1}' | awk -F'/' '{print $2}')
+  echo 'Creating' "$folder_name"
+  cp -r hminus/template hminus/"$folder_name"
+  cp "$file" hminus/"$folder_name"/FAL_VD
+  echo 'lte' > hminus/"$folder_name"/fort.99
+  cd hminus/"$folder_name"/ || exit
+  ./hminus.exe
+  a=$(cat fort.99)
+  if [ 'exit' = "$a" ] ; then 
+    echo 'hminus completed successfully'
+    cd ../.. || exit
+    if [ ! -d fioss ]; then
+      echo 'fioss directory does not exist, creating'
+      mkdir fioss
+    fi
+    echo "Running fioss_prepare for ""$folder_name"
+    fioss_prepare "$folder_name"
+    cd fioss/"$folder_name" || exit
+	cat > job.sh <<- EOT
+	#!/bin/bash
+	#PBS -q atlasq
+	#PBS -N nessy${folder_name}
+	#PBS -M cernetic@mps.mpg.de
+	#PBS -j oe
+	#PBS -l nodes=1:ppn=48
+	#PBS -l walltime=1:00:00
+	EOT
+	cat >> job.sh <<- "EOT"
+	# name(s) of module(s) to load
+	MODULES=mvapich2_pgi
+
+	# initialize modules environment
+	. $MODULESHOME/init/bash
+
+	# load module(s)
+	module load $MODULES
+	module load intel
+
+	# change to submit dir
+	cd $PBS_O_WORKDIR
+
+	# number of processes
+	NP=$(cat $PBS_NODEFILE | wc -l)
+
+	# number of processes per node
+	PPN=$(($NP/$(cat $PBS_NODEFILE|uniq|wc -l)))
+
+	# set number of hardware contexts
+	export PSM_SHAREDCONTEXTS_MAX=$(((($PPN+3))/4))
+
+	# start your job
+	#	currentFile="4b"
+	#	subBinsFile="      reduced='.r"
+	#	subBinsFile+=$currentFile"'"
+	#	index=859
+	#	`sed -i "${index}s/.*/${subBinsFile}/" ../COSI_new/cosi/inibl0.for`
+	#	export TERM=xterm
+	#	export PATH=/scratch/cernetic/nessyH1/scripts/:$PATH
+	#	export COSI_BIN=/scratch/cernetic/nessyH1/scripts/
+		export MAX_PROC=48
+		fioss_do2 1010 10 8980 > nohup
+	# unload module(s)
+	module unload $MODULES
+	module unload intel
+	EOT
+    qsub job.sh
+  else
+    echo "Problem with atmosphere" "$file"
+    cd .. || exit
+    mv "$folder_name" "$folder_name""failed"
+    cd .. || exit
+  fi
+  ) &
+done
+wait
+echo "All done, use 'qstat' to check the jobs queued on the cluster."
+
