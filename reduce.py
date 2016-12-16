@@ -183,7 +183,6 @@ def sub_bins(subBinFile, singleBin, tempList, counter):
         i += 1
 
             
-    np.savetxt(str(tempListList[0][0]), tempListList, fmt = floatFormat)
     deltaLambda, temp, beginning, end = 0, 0, singleBin[0], 0
     subbinArray = np.array([1,1,1])
     i = 0
