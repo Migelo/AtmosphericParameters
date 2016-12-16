@@ -206,10 +206,7 @@ def deleteOverlapping(tempList, fileName):
     return tempList
     
 merge_files()
-#print depthLength
-#segmentFileList = [str(item).zfill(depthLength) + '.segment' for item in depthList]
-#p = Pool(cpuNumber)
-#p.map(deltaLambda, segmentFileList)
+
 
 #==============================================================================
 # 
@@ -230,10 +227,8 @@ def bining(depthList):
         sys.exit('Check your bins')
         #check if the bins are within range of wawelenghts
     
-#    p = Pool(cpuNumber)    
-#    p.map(reducing, depthList)
-#    for item in depthList: reducing(item)
-    reducing(1)
+    p = Pool(cpuNumber)    
+    p.map(reducing, depthList)
     
   
 def reducing(currentFile):
