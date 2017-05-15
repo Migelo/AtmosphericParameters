@@ -1,5 +1,5 @@
 import numpy as np
-import args
+import argparse
 import os
 
 parser = argparse.ArgumentParser(description='Calculate contrast. (spectra1 - spectra2) / (spectra3 - spectra4)')
@@ -11,11 +11,11 @@ parser.add_argument('spectra4', type=str, help='Fourth spectra.')
 args = parser.parse_args()
 #set the necessary parameters for parsing
 
-spectra1 = np.loadtxt(spectra1)
-spectra2 = np.loadtxt(spectra2)
-spectra3 = np.loadtxt(spectra3)
-spectra4 = np.loadtxt(spectra4)
+spectra1 = np.loadtxt(args.spectra1)
+spectra2 = np.loadtxt(args.spectra2)
+spectra3 = np.loadtxt(args.spectra3)
+spectra4 = np.loadtxt(args.spectra4)
 
 result = (spectra1[:,-1] - spectra2[:,-1])/(spectra3[:,-1] - spectra4[:,-1])
 
-np.savetxt(spectra1.split("/")[-1] + "Contrast",np.c_[spectra1[:,0],result])
+np.savetxt(args.spectra1.split("/")[-1] + "Contrast",np.c_[spectra1[:,0],result])

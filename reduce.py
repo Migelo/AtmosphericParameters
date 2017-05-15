@@ -126,9 +126,9 @@ def reducing(currentFile):
 #                    print 'last element: ',tempList[-1]
                     sub_bins(args.subBins, singleBin, tempList, counter)
                     #tempList = sort_array(tempList, 1, 2) #sort by opacities
-                #    f = open(currentFile.split('.')[0] + '.binned' + args.subBins.split('s')[-1], "a")
-                 #   np.savetxt(f, tempList, fmt = floatFormat)
-                  #  f.close()
+#                    f = open(currentFile.split('.')[0] + '.binned' + args.subBins.split('s')[-1], "a")
+#                    np.savetxt(f, tempList, fmt = floatFormat)
+#                    f.close()
             elif (outsideOfTheBin and encounteredBinYet):
                 tempList[-1][-1] = np.float(singleBin[1] - tempList[-1][0])
                 start_at = int(i)-3
@@ -139,9 +139,9 @@ def reducing(currentFile):
 #                print 'first: ',tempList[0], ' last: ',tempList[-1],'sum ',tempList[-1][0]+tempList[-1][-1],singleBin[-1]
                 sub_bins(args.subBins, singleBin, tempList, counter)                
                 #tempList = sort_array(tempList, 1, 2) #sort by opacities
-                #f = open(currentFile.split('.')[0] + '.binned' + args.subBins.split('s')[-1], "a")
-                #np.savetxt(f, tempList, fmt = floatFormat)
-                #f.close()
+#                f = open(currentFile.split('.')[0] + '.binned' + args.subBins.split('s')[-1], "a")
+#                np.savetxt(f, tempList, fmt = floatFormat)
+#                f.close()
                 break #once we leave the part of the file containing current bin, break and go to the next segment file
             i += 1
     

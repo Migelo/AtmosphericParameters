@@ -1,14 +1,10 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 
-#temperatures = np.arange(10**3.3, 10**5.3, 10**.02)
 temperatures = np.logspace(3.3, 5.3, 57)
-#for i in range(len(temperatures)):temperatures[i] = int(temperatures[i])
     
 pressure = np.logspace(-4, 8, 25)
-#for i in range(len(Nh)):Nh[i] = int(Nh[i])
 
-#i = 0
 for temp in temperatures:
     i = 0
     table=[]
