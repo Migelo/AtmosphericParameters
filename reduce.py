@@ -9,6 +9,7 @@ parser = argparse.ArgumentParser(description='Sort the spectra.')
 parser.add_argument('bins', type=str, help='File defining the wawelenght bins')
 parser.add_argument('subBins', help='File defining the subBins distribution.')
 parser.add_argument('cpuNumber', type=int, help='Number of CPUs to be used.')
+parser.add_argument('--stromgen', type=bool, default=False, help='Whether to use stromgen segments.')
 args = parser.parse_args()
 
 cpuNumber = args.cpuNumber
@@ -18,6 +19,8 @@ floatFormat = '%.7e'
 
 table = []
 depthList = range(1, len(glob.glob('*.segment')) + 1)
+if args.stromgen:
+    depthList = range(1, len(glob.glob('*.segment_stromgen')) + 1)
 
 depthLength = len(str(len(depthList)))
 
@@ -25,6 +28,8 @@ binData = np.loadtxt(args.bins)
 
 # get minimum and maximum wawelenghts from the first .segment file
 minMax = np.loadtxt(str(depthList[0]).zfill(depthLength) + '.segment')
+if args.stromgen:
+    minMax = np.loadtxt(str(depthList[0]).zfill(depthLength) + '.segment_stromgen')
 
 
 def sort_array(array, column, removeHeader):
@@ -55,12 +60,21 @@ def bining(depthList):
 
 def reducing(currentFile):
     counter = currentFile
-    currentFile = str(currentFile).zfill(depthLength) + '.segment'
+    if args.stromgen:
+        currentFile = str(currentFile).zfill(depthLength) + '.segment_stromgen'
+    else:
+        currentFile = str(currentFile).zfill(depthLength) + '.segment'
     print('Reducing: ' + str(currentFile))
     data = np.loadtxt(currentFile)  # load the current file to memory
     start_at = 0
     global binData
+    first_exception = False
     for singleBin in binData:  # for each bin
+        if first_exception:
+            continue
+        if len(binData.shape) == 1:
+            singleBin = np.array([binData[0], binData[1]])
+            first_exception = True
         test = True
         tempList = []
         encounteredBinYet = False
@@ -132,9 +146,15 @@ def sub_bins(subBinFile, singleBin, tempListList, counter):
         sub_bin_values.append([beginning, beginning + np.sum(tempListList[border_indexes[i]:border_indexes[i + 1], -1]), np.float(tempp)])
         beginning += np.sum(tempListList[border_indexes[i]:border_indexes[i + 1], -1])
     if np.array_equal(singleBin, binData[0]):
-        np.savetxt(str(counter) + '.r' + args.subBins.split('s')[-1], sub_bin_values, fmt=floatFormat)
+        if args.stromgen:
+            np.savetxt(str(counter) + '.r' + args.subBins.split('s')[-1] + '_s' , sub_bin_values, fmt=floatFormat)
+        else:
+            np.savetxt(str(counter) + '.r' + args.subBins.split('s')[-1], sub_bin_values, fmt=floatFormat)
     else:
-        f = open(str(counter) + '.r' + args.subBins.split('s')[-1], 'a')
+        if args.stromgen:
+            f = open(str(counter) + '.r' + args.subBins.split('s')[-1] + '_s', 'a')
+        else:
+            f = open(str(counter) + '.r' + args.subBins.split('s')[-1], 'a')
         np.savetxt(f, sub_bin_values, fmt=floatFormat)
         f.close()
 
