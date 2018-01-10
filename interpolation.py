@@ -66,7 +66,7 @@ def interpolate_square(grid, T_point, Nh_point):
     if points == -1:
         print ''
     for point in points:
-        for i in range(len(grid)):
+        for i, _ in enumerate(grid):
             if grid[i][0] == point[0]:
                 j = i
                 while grid[j][1] != point[-1]:
@@ -107,7 +107,6 @@ def interp(point):
         my_value = interpolate_square(interpolation_grid, T_to_interpolate, Nh_to_interpolate)
         interpolated_ODF.append(my_value)
     np.savetxt('interpolation/' + str(point) + '.int' + str(args.subBins.split('s')[-1]), np.stack((example[:, 0], example[:, 1], interpolated_ODF), axis=-1), fmt='%.7e')
-    pass
 
 depth_points = range(1, len(atmosphere) + 1)
 p = Pool(args.cpuNumber)

@@ -34,14 +34,6 @@ else:
 print(depthList)
 
 
-def sort_array(array, column, removeHeader):
-    if removeHeader > 0:
-        for i in range(0, removeHeader):
-            array = np.delete(array, (0), axis=0)
-    array = array[np.argsort(array[:, column])]
-    return array
-
-
 def bining(depthList):
     wawelenghts = [array[0] for array in minMax]
     minimum = np.min(wawelenghts)
