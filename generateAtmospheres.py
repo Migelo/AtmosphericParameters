@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 
-temperatures = np.logspace(3.3, 5.3, 57)
+# temperatures = np.logspace(3.3, 5.3, 57)
+temperatures = 10**np.loadtxt('temperatures')
 pressure = np.logspace(-4, 8, 25)
 
 for temp in temperatures:
